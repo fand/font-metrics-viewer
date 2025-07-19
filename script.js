@@ -211,14 +211,24 @@ function drawVisualization() {
       ? metrics.ascender - metrics.descender + metrics.lineGap
       : fontSize * lineHeight;
 
-  // Canvas should fill the container width
-  canvas.width = containerWidth;
-  canvas.height = lineHeightPx + padding * 2;
+  // Always render at 2x resolution
+  const dpr = 2;
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Canvas should fill the container width
+  const canvasWidth = containerWidth;
+  const canvasHeight = lineHeightPx + padding * 2;
+  canvas.width = canvasWidth * dpr;
+  canvas.height = canvasHeight * dpr;
+  canvas.style.width = canvasWidth + "px";
+  canvas.style.height = canvasHeight + "px";
+
+  // Scale context for retina
+  ctx.scale(dpr, dpr);
+
+  ctx.clearRect(0, 0, containerWidth, lineHeightPx + padding * 2);
 
   const baselineY =
-    canvas.height / 2 +
+    (lineHeightPx + padding * 2) / 2 +
     (metrics.ascender - metrics.descender) / 2 +
     metrics.descender;
 
@@ -227,32 +237,32 @@ function drawVisualization() {
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(0, baselineY);
-  ctx.lineTo(canvas.width, baselineY);
+  ctx.lineTo(canvasWidth, baselineY);
   ctx.stroke();
 
   ctx.strokeStyle = METRICS_COLORS.ascender;
   ctx.beginPath();
   ctx.moveTo(0, baselineY - metrics.ascender);
-  ctx.lineTo(canvas.width, baselineY - metrics.ascender);
+  ctx.lineTo(canvasWidth, baselineY - metrics.ascender);
   ctx.stroke();
 
   ctx.strokeStyle = METRICS_COLORS.descender;
   ctx.beginPath();
   ctx.moveTo(0, baselineY - metrics.descender);
-  ctx.lineTo(canvas.width, baselineY - metrics.descender);
+  ctx.lineTo(canvasWidth, baselineY - metrics.descender);
   ctx.stroke();
 
   ctx.strokeStyle = METRICS_COLORS.capHeight;
   ctx.setLineDash([5, 5]);
   ctx.beginPath();
   ctx.moveTo(0, baselineY - metrics.capHeight);
-  ctx.lineTo(canvas.width, baselineY - metrics.capHeight);
+  ctx.lineTo(canvasWidth, baselineY - metrics.capHeight);
   ctx.stroke();
 
   ctx.strokeStyle = METRICS_COLORS.xHeight;
   ctx.beginPath();
   ctx.moveTo(0, baselineY - metrics.xHeight);
-  ctx.lineTo(canvas.width, baselineY - metrics.xHeight);
+  ctx.lineTo(canvasWidth, baselineY - metrics.xHeight);
   ctx.stroke();
 
   ctx.setLineDash([]);
@@ -285,33 +295,33 @@ function drawVisualization() {
   textDisplay.style.lineHeight = `${lineHeightPx}px`;
 
   // Visualizer-contentの高さを設定
-  visualizerContent.style.height = `${canvas.height}px`;
+  visualizerContent.style.height = `${canvasHeight}px`;
 
   // Draw labels
   ctx.font = "12px sans-serif";
   ctx.textAlign = "right";
   ctx.fillStyle = METRICS_COLORS.baseline;
-  ctx.fillText("baseline", canvas.width - 10, baselineY - 5);
+  ctx.fillText("baseline", canvasWidth - 10, baselineY - 5);
 
   ctx.fillStyle = METRICS_COLORS.ascender;
-  ctx.fillText("ascender", canvas.width - 10, baselineY - metrics.ascender - 5);
+  ctx.fillText("ascender", canvasWidth - 10, baselineY - metrics.ascender - 5);
 
   ctx.fillStyle = METRICS_COLORS.descender;
   ctx.fillText(
     "descender",
-    canvas.width - 10,
+    canvasWidth - 10,
     baselineY - metrics.descender + 15
   );
 
   ctx.fillStyle = METRICS_COLORS.capHeight;
   ctx.fillText(
     "cap height",
-    canvas.width - 10,
+    canvasWidth - 10,
     baselineY - metrics.capHeight - 5
   );
 
   ctx.fillStyle = METRICS_COLORS.xHeight;
-  ctx.fillText("x-height", canvas.width - 10, baselineY - metrics.xHeight - 5);
+  ctx.fillText("x-height", canvasWidth - 10, baselineY - metrics.xHeight - 5);
 }
 
 async function updateVisualization() {
