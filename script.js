@@ -184,8 +184,8 @@ const lineHeightInput = pane
 
 // Position tweakpane
 pane.element.style.position = "fixed";
-pane.element.style.top = "20px";
-pane.element.style.right = "20px";
+pane.element.style.top = "16px";
+pane.element.style.right = "16px";
 pane.element.style.zIndex = "2";
 
 const METRICS_COLORS = {
