@@ -17,6 +17,18 @@ h1 {
   color: #333;
 }
 
+.github-link {
+  color: #666;
+  text-decoration: none;
+  margin-left: 2px;
+  display: inline-block;
+  font-size: 0.8rem;
+}
+
+.github-link:hover {
+  color: #666;
+}
+
 .visualizer {
   background-color: white;
   position: fixed;
@@ -80,30 +92,18 @@ h1 {
   font-size: 0.8rem;
   color: #888;
   z-index: 2;
-  background-color: rgba(255, 255, 255, 0.9);
   padding: 10px 20px;
   border-radius: 8px;
-  backdrop-filter: blur(5px);
   margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .font-name {
   font-weight: bold;
   color: #333;
-  margin-bottom: 8px;
   font-size: 1rem;
-}
-
-.metrics-row {
-  margin-bottom: 8px;
-}
-
-.metrics-row:last-child {
-  margin-bottom: 0;
-}
-
-.metrics-row.calculated {
-  padding-top: 8px;
 }
 
 .metric-inline {
