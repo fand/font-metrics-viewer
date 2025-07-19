@@ -15,6 +15,8 @@ const pane = new Tweakpane.Pane({
 const params = {
   fontFamily: "Inter",
   fontSize: 200,
+  fontWeight: "400",
+  fontStyle: "normal",
   lineHeightAuto: true,
   lineHeight: 1.2,
   loadFile: () => {
@@ -125,6 +127,36 @@ pane
   })
   .on("change", () => {
     updateMetricsDisplay();
+    drawVisualization();
+  });
+
+pane
+  .addInput(params, "fontWeight", {
+    options: {
+      "100": "100",
+      "200": "200", 
+      "300": "300",
+      "400": "400",
+      "500": "500",
+      "600": "600",
+      "700": "700",
+      "800": "800",
+      "900": "900",
+    },
+  })
+  .on("change", () => {
+    drawVisualization();
+  });
+
+pane
+  .addInput(params, "fontStyle", {
+    options: {
+      "normal": "normal",
+      "italic": "italic",
+      "oblique": "oblique",
+    },
+  })
+  .on("change", () => {
     drawVisualization();
   });
 
@@ -360,7 +392,7 @@ function drawVisualization() {
   const containerWidth = visualizerContent.offsetWidth;
 
   // Set font before measuring text
-  ctx.font = `${fontSize}px "${params.fontFamily}", sans-serif`;
+  ctx.font = `${params.fontStyle} ${params.fontWeight} ${fontSize}px "${params.fontFamily}", sans-serif`;
   const textWidth = ctx.measureText(text).width;
 
   const lineHeightPx =
@@ -451,6 +483,8 @@ function drawVisualization() {
   // Update HTML text display (contenteditableなので、テキストは変更しない)
   textDisplay.style.fontFamily = `"${params.fontFamily}", sans-serif`;
   textDisplay.style.fontSize = `${fontSize}px`;
+  textDisplay.style.fontWeight = params.fontWeight;
+  textDisplay.style.fontStyle = params.fontStyle;
   textDisplay.style.lineHeight = `${lineHeightPx}px`;
 
   // CSS handles height matching now
