@@ -23,59 +23,93 @@ async function loadGoogleFont(fontFamily) {
         return loadedFonts.get(fontFamily);
     }
 
-    const fontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(' ', '+')}:wght@400&display=swap`;
+    // Google Fonts APIからCSSを取得
+    const fontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(' ', '+')}`;
+    
+    try {
+        // 直接Google FontsのCSSを取得
+        const response = await fetch(fontUrl);
+        const css = await response.text();
+        
+        console.log('CSS Response:', css.substring(0, 200));
+        
+        // CSSからフォントURLを抽出（woff2形式）
+        const fontUrlMatch = css.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)/);
+        
+        if (fontUrlMatch) {
+            let fontFileUrl = fontUrlMatch[1];
+            console.log('Found font URL:', fontFileUrl);
+            
+            // URLから引用符を削除
+            fontFileUrl = fontFileUrl.replace(/['"]/g, '');
+            
+            try {
+                // フォントファイルをバイナリとして取得
+                const fontResponse = await fetch(fontFileUrl);
+                const fontBuffer = await fontResponse.arrayBuffer();
+                
+                // Fontkitでフォントを読み込む
+                const font = fontkit.create(new Uint8Array(fontBuffer));
+                loadedFonts.set(fontFamily, font);
+                console.log('Font loaded successfully with Fontkit:', font);
+                
+                // 表示用にもCSSを追加
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(' ', '+')}:wght@400&display=swap`;
+                document.head.appendChild(link);
+                
+                return font;
+            } catch (error) {
+                console.error('Error loading font file:', error);
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching font CSS:', error);
+    }
+
+    // フォールバック: 表示用のみ読み込む
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = fontUrl;
+    link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(' ', '+')}:wght@400&display=swap`;
     document.head.appendChild(link);
-
+    
     await new Promise(resolve => {
         link.onload = resolve;
+        setTimeout(resolve, 1000);
     });
 
-    const fontFaceRule = Array.from(document.styleSheets)
-        .flatMap(sheet => {
-            try {
-                return Array.from(sheet.cssRules || []);
-            } catch (e) {
-                return [];
-            }
-        })
-        .find(rule => rule.type === CSSRule.FONT_FACE_RULE && rule.style.fontFamily.includes(fontFamily));
-
-    if (fontFaceRule) {
-        const fontFileUrl = fontFaceRule.style.src.match(/url\("?([^"]+)"?\)/)[1];
-        
-        try {
-            const font = await opentype.load(fontFileUrl);
-            loadedFonts.set(fontFamily, font);
-            return font;
-        } catch (error) {
-            console.error('Error loading font:', error);
-            return null;
-        }
-    }
-    
+    console.warn(`Could not load font for ${fontFamily}, using fallback`);
     return null;
 }
 
 function getMetrics(font, fontSize) {
+    if (!font) {
+        // フォールバックメトリクス
+        return {
+            ascender: fontSize * 0.8,
+            descender: fontSize * -0.2,
+            lineGap: 0,
+            capHeight: fontSize * 0.7,
+            xHeight: fontSize * 0.5,
+        };
+    }
+    
+    // Fontkitのメトリクスを使用
     const scale = fontSize / font.unitsPerEm;
     
     return {
-        ascender: font.ascender * scale,
-        descender: font.descender * scale,
+        ascender: font.ascent * scale,
+        descender: font.descent * scale,
         lineGap: (font.lineGap || 0) * scale,
-        capHeight: (font.tables.os2?.sCapHeight || font.ascender * 0.8) * scale,
-        xHeight: (font.tables.os2?.sxHeight || font.ascender * 0.5) * scale,
+        capHeight: (font.capHeight || font.ascent * 0.8) * scale,
+        xHeight: (font.xHeight || font.ascent * 0.5) * scale,
         unitsPerEm: font.unitsPerEm,
         scale: scale
     };
 }
 
 function drawVisualization() {
-    if (!currentFont) return;
-
     const text = textInput.value || 'Hej!';
     const fontSize = parseInt(fontSizeInput.value);
     const lineHeight = lineHeightAutoCheckbox.checked ? 'normal' : parseFloat(lineHeightInput.value);
@@ -83,6 +117,9 @@ function drawVisualization() {
     const metrics = getMetrics(currentFont, fontSize);
     
     const padding = 60;
+    
+    // Set font before measuring text
+    ctx.font = `${fontSize}px "${fontFamilySelect.value}"`;
     const textWidth = ctx.measureText(text).width;
     
     const lineHeightPx = lineHeight === 'normal' 
@@ -96,6 +133,7 @@ function drawVisualization() {
     
     const baselineY = canvas.height / 2 + (metrics.ascender - metrics.descender) / 2 + metrics.descender;
     
+    // Draw metric lines
     ctx.strokeStyle = METRICS_COLORS.baseline;
     ctx.lineWidth = 2;
     ctx.setLineDash([5, 5]);
@@ -130,12 +168,14 @@ function drawVisualization() {
     
     ctx.setLineDash([]);
     
+    // Draw text
     ctx.font = `${fontSize}px "${fontFamilySelect.value}"`;
     ctx.fillStyle = '#000';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
     ctx.fillText(text, canvas.width / 2, baselineY);
     
+    // Draw labels
     ctx.font = '12px sans-serif';
     ctx.textAlign = 'right';
     ctx.fillStyle = METRICS_COLORS.baseline;
@@ -156,13 +196,22 @@ function drawVisualization() {
 
 async function updateVisualization() {
     const fontFamily = fontFamilySelect.value;
-    currentFont = await loadGoogleFont(fontFamily);
+    console.log('Loading font:', fontFamily);
     
-    if (currentFont) {
-        drawVisualization();
-    }
+    // ローディング表示
+    ctx.fillStyle = '#666';
+    ctx.font = '16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Loading font...', canvas.width / 2, canvas.height / 2);
+    
+    currentFont = await loadGoogleFont(fontFamily);
+    console.log('Font loaded:', currentFont ? 'Success' : 'Using fallback');
+    
+    // Always draw visualization
+    drawVisualization();
 }
 
+// Event listeners
 textInput.addEventListener('input', drawVisualization);
 fontFamilySelect.addEventListener('change', updateVisualization);
 fontSizeInput.addEventListener('input', drawVisualization);
@@ -173,4 +222,5 @@ lineHeightAutoCheckbox.addEventListener('change', (e) => {
     drawVisualization();
 });
 
+// Initialize
 updateVisualization();
