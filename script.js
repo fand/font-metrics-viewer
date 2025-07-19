@@ -467,15 +467,18 @@ function drawVisualization() {
     ctx.fillRect(0, bottomMin, canvas.width, halfLeading);
 
     // Half leading labels
-    ctx.font = "14px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillStyle = "rgba(0, 128, 255, 0.8)";
+    if (Math.abs(halfLeading) > 5) {
+      ctx.font = "14px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillStyle = "rgba(0, 128, 255, 0.8)";
 
-    let topLabel = baselineY - metrics.ascender - Math.max(0, halfLeading);
-    let bottomLabel = baselineY - metrics.descender + Math.max(0, halfLeading);
+      let topLabel = baselineY - metrics.ascender - Math.max(0, halfLeading);
+      let bottomLabel =
+        baselineY - metrics.descender + Math.max(0, halfLeading);
 
-    ctx.fillText("half leading", 0, topLabel + 18);
-    ctx.fillText("half leading", 0, bottomLabel - 5);
+      ctx.fillText("half leading", 0, topLabel + 18);
+      ctx.fillText("half leading", 0, bottomLabel - 5);
+    }
   }
 
   // Update HTML text display (contenteditableなので、テキストは変更しない)
@@ -504,6 +507,50 @@ function drawVisualization() {
 
   ctx.fillStyle = METRICS_COLORS.xHeight;
   ctx.fillText("x-height", canvasWidth, baselineY - metrics.xHeight - 5);
+
+  // Draw line height arrow
+  const totalFontHeight = metrics.ascender - metrics.descender;
+  const totalHalfLeading = (lineHeightPx - totalFontHeight) / 2;
+
+  const arrowStartY = baselineY - metrics.ascender - totalHalfLeading;
+  const arrowEndY = baselineY - metrics.descender + totalHalfLeading;
+  const arrowX = 120;
+
+  // Arrow line
+  ctx.strokeStyle = "rgba(0, 128, 255, 0.3)";
+  ctx.lineWidth = 2;
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(arrowX, arrowStartY);
+  ctx.lineTo(arrowX, arrowEndY);
+  ctx.stroke();
+
+  // Arrow heads
+  const arrowSize = 8;
+  ctx.fillStyle = "rgba(0, 128, 255, 0.3)";
+
+  // Top arrow head
+  ctx.beginPath();
+  ctx.moveTo(arrowX, arrowStartY);
+  ctx.lineTo(arrowX - arrowSize / 2, arrowStartY + arrowSize);
+  ctx.lineTo(arrowX + arrowSize / 2, arrowStartY + arrowSize);
+  ctx.closePath();
+  ctx.fill();
+
+  // Bottom arrow head
+  ctx.beginPath();
+  ctx.moveTo(arrowX, arrowEndY);
+  ctx.lineTo(arrowX - arrowSize / 2, arrowEndY - arrowSize);
+  ctx.lineTo(arrowX + arrowSize / 2, arrowEndY - arrowSize);
+  ctx.closePath();
+  ctx.fill();
+
+  // Arrow label
+  ctx.font = "15px sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillStyle = "rgba(0, 128, 255, 0.8)";
+  const labelY = (arrowStartY + arrowEndY) / 2;
+  ctx.fillText("actual line height", arrowX + 15, labelY + 4);
 }
 
 async function updateVisualization() {
