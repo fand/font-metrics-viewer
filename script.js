@@ -17,6 +17,47 @@ const params = {
   fontSize: 200,
   lineHeightAuto: true,
   lineHeight: 1.2,
+  loadFile: () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.otf,.ttf,.woff,.woff2';
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const font = fontkit.create(new Uint8Array(arrayBuffer));
+          currentFont = font;
+          loadedFonts.set(file.name, font);
+          
+          // Create a CSS font-face for the loaded font
+          const fontName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+          const fontUrl = URL.createObjectURL(file);
+          
+          // Add CSS font-face
+          const style = document.createElement('style');
+          style.textContent = `
+            @font-face {
+              font-family: "${fontName}";
+              src: url("${fontUrl}");
+            }
+          `;
+          document.head.appendChild(style);
+          
+          // Update params to show loaded file name
+          params.fontFamily = fontName;
+          pane.refresh();
+          
+          updateMetricsDisplay();
+          drawVisualization();
+        } catch (error) {
+          console.error('Error loading font file:', error);
+          alert('Error loading font file. Please make sure it\'s a valid font file.');
+        }
+      }
+    };
+    input.click();
+  },
 };
 
 // Font family options
@@ -61,6 +102,10 @@ const fontOptions = [
 ];
 
 // Add controls
+pane.addButton({
+  title: 'Load Local Font',
+}).on('click', params.loadFile);
+
 pane
   .addInput(params, "fontFamily", {
     options: fontOptions.reduce((acc, option) => {
@@ -236,6 +281,7 @@ function getMetrics(font, fontSize) {
 }
 
 function updateMetricsDisplay() {
+  const fontNameEl = document.getElementById("fontName");
   const unitsPerEmEl = document.getElementById("unitsPerEm");
   const ascentEl = document.getElementById("ascentValue");
   const descentEl = document.getElementById("descentValue");
@@ -249,6 +295,9 @@ function updateMetricsDisplay() {
 
   const fontSize = params.fontSize;
   const lineHeight = params.lineHeightAuto ? "normal" : params.lineHeight;
+
+  // Update font name display
+  fontNameEl.textContent = params.fontFamily;
 
   if (currentFont) {
     const metrics = getMetrics(currentFont, fontSize);
