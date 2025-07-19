@@ -16,6 +16,7 @@ const METRICS_COLORS = {
   capHeight: "#ff00ff",
   xHeight: "#ffaa00",
   lineGap: "#00ffff",
+  lineGapNegative: "#ff6600",
 };
 
 async function loadGoogleFont(fontFamily) {
@@ -256,6 +257,23 @@ function drawVisualization() {
 
   ctx.setLineDash([]);
 
+  // Draw Half Leading areas
+  const fontHeight = metrics.ascender - metrics.descender;
+  const halfLeading = (lineHeightPx - fontHeight) / 2;
+
+  if (halfLeading > 0) {
+    ctx.fillStyle = "rgba(0, 128, 255, 0.1)";
+    // Top half leading
+    ctx.fillRect(
+      0,
+      baselineY - metrics.ascender - halfLeading,
+      canvas.width,
+      halfLeading
+    );
+    // Bottom half leading
+    ctx.fillRect(0, baselineY - metrics.descender, canvas.width, halfLeading);
+  }
+
   // Update HTML text display (contenteditableなので、テキストは変更しない)
   textDisplay.style.fontFamily = `"${fontFamilySelect.value}", sans-serif`;
   textDisplay.style.fontSize = `${fontSize}px`;
@@ -289,6 +307,53 @@ function drawVisualization() {
 
   ctx.fillStyle = METRICS_COLORS.xHeight;
   ctx.fillText("x-height", canvas.width - 10, baselineY - metrics.xHeight - 5);
+
+  {
+    let topMin = baselineY - metrics.ascender - halfLeading;
+    let bottomMin = baselineY - metrics.descender + halfLeading;
+
+    let bottomMax =
+      halfLeading > 0
+        ? baselineY - metrics.descender + halfLeading
+        : baselineY - metrics.descender;
+
+    ctx.fillStyle =
+      halfLeading > 0 ? "rgba(0, 128, 255, 0.8)" : "rgba(255, 0, 0, 0.8)";
+
+    // Half leading areas
+    ctx.fillRect(0, topMin, canvas.width, halfLeading);
+    ctx.fillRect(0, bottomMin, canvas.width, halfLeading);
+
+    // Half leading labels
+    ctx.fillText("half leading", canvas.width - 10, topMin + 15);
+    ctx.fillText("half leading", canvas.width - 10, bottomMax - 5);
+  }
+
+  // lineGap labels
+  if (metrics.lineGap !== 0) {
+    ctx.fillStyle =
+      metrics.lineGap > 0
+        ? METRICS_COLORS.lineGap
+        : METRICS_COLORS.lineGapNegative;
+    const lineGapLabel = `lineGap (${
+      metrics.lineGap > 0 ? "+" : ""
+    }${metrics.lineGap.toFixed(1)}px)`;
+
+    if (metrics.lineGap > 0) {
+      ctx.fillText(
+        lineGapLabel,
+        canvas.width - 10,
+        baselineY - metrics.ascender - metrics.lineGap / 2
+      );
+    } else {
+      const halfGap = Math.abs(metrics.lineGap) / 2;
+      ctx.fillText(
+        lineGapLabel,
+        canvas.width - 10,
+        baselineY - metrics.ascender + halfGap / 2
+      );
+    }
+  }
 }
 
 async function updateVisualization() {
