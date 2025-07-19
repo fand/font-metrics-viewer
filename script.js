@@ -1,6 +1,5 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-const textInput = document.getElementById('textInput');
 const fontFamilySelect = document.getElementById('fontFamily');
 const fontSizeInput = document.getElementById('fontSize');
 const lineHeightAutoCheckbox = document.getElementById('lineHeightAuto');
@@ -140,7 +139,7 @@ function updateMetricsDisplay() {
 }
 
 function drawVisualization() {
-    const text = textInput.value || 'Hej!';
+    const text = textDisplay.textContent || 'Hej!';
     const fontSize = parseInt(fontSizeInput.value);
     const lineHeight = lineHeightAutoCheckbox.checked ? 'normal' : parseFloat(lineHeightInput.value);
     
@@ -198,8 +197,7 @@ function drawVisualization() {
     
     ctx.setLineDash([]);
     
-    // Update HTML text display
-    textDisplay.textContent = text;
+    // Update HTML text display (contenteditableなので、テキストは変更しない)
     textDisplay.style.fontFamily = `"${fontFamilySelect.value}", sans-serif`;
     textDisplay.style.fontSize = `${fontSize}px`;
     textDisplay.style.lineHeight = `${lineHeightPx}px`;
@@ -248,7 +246,6 @@ async function updateVisualization() {
 }
 
 // Event listeners
-textInput.addEventListener('input', drawVisualization);
 fontFamilySelect.addEventListener('change', updateVisualization);
 fontSizeInput.addEventListener('input', drawVisualization);
 lineHeightInput.addEventListener('input', drawVisualization);
@@ -258,5 +255,9 @@ lineHeightAutoCheckbox.addEventListener('change', (e) => {
     drawVisualization();
 });
 
+// Redraw when text is edited
+textDisplay.addEventListener('input', drawVisualization);
+
 // Initialize
+textDisplay.textContent = 'Hej!';
 updateVisualization();

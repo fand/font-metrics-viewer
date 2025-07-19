@@ -50,8 +50,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: none;
     white-space: nowrap;
+    outline: none;
+    cursor: text;
+}
+
+.text-display:focus {
+    background-color: rgba(0, 0, 0, 0.02);
 }
 
 .section {
