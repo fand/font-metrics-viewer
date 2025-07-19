@@ -9,10 +9,10 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="container">
-      <h1>Font Metrics Visualizer</h1>
+    <h1>Font Metrics Visualizer</h1>
 
-      <!-- Visualizer -->
+    <!-- Visualizer -->
+    <div class="container">
       <div class="visualizer">
         <div class="visualizer-content">
           <canvas id="canvas"></canvas>
@@ -23,46 +23,46 @@
           ></div>
         </div>
       </div>
-
-      <!-- Metrics Info -->
-      <div class="metrics-info">
-        <div class="metrics-row">
-          <span class="metric-inline">
-            <span class="metric-label">Units/Em:</span>
-            <span id="unitsPerEm" class="metric-value">-</span>
-          </span>
-          <span class="metric-inline">
-            <span class="metric-label">Ascent:</span>
-            <span id="ascentValue" class="metric-value">-</span>
-          </span>
-          <span class="metric-inline">
-            <span class="metric-label">Descent:</span>
-            <span id="descentValue" class="metric-value">-</span>
-          </span>
-          <span class="metric-inline">
-            <span class="metric-label">Line Gap:</span>
-            <span id="lineGapValue" class="metric-value">-</span>
-          </span>
-        </div>
-        <div class="metrics-row calculated">
-          <span class="metric-inline">
-            <span class="metric-label">Top to Baseline:</span>
-            <span id="topToBaselineFormula" class="metric-formula">-</span>
-            <span class="metric-equals">=</span>
-            <span id="topToBaselineValue" class="metric-value">-</span>
-          </span>
-          <span class="metric-inline">
-            <span class="metric-label">Half Leading:</span>
-            <span id="halfLeadingFormula" class="metric-formula">-</span>
-            <span class="metric-equals">=</span>
-            <span id="halfLeadingValue" class="metric-value">-</span>
-          </span>
-        </div>
-      </div>
-
-      <!-- Parameters -->
-      <div id="tweakpane"></div>
     </div>
+
+    <!-- Metrics Info -->
+    <div class="metrics-info">
+      <div class="metrics-row">
+        <span class="metric-inline">
+          <span class="metric-label">Units/Em:</span>
+          <span id="unitsPerEm" class="metric-value">-</span>
+        </span>
+        <span class="metric-inline">
+          <span class="metric-label">Ascent:</span>
+          <span id="ascentValue" class="metric-value">-</span>
+        </span>
+        <span class="metric-inline">
+          <span class="metric-label">Descent:</span>
+          <span id="descentValue" class="metric-value">-</span>
+        </span>
+        <span class="metric-inline">
+          <span class="metric-label">Line Gap:</span>
+          <span id="lineGapValue" class="metric-value">-</span>
+        </span>
+      </div>
+      <div class="metrics-row calculated">
+        <span class="metric-inline">
+          <span class="metric-label">Top to Baseline:</span>
+          <span id="topToBaselineFormula" class="metric-formula">-</span>
+          <span class="metric-equals">=</span>
+          <span id="topToBaselineValue" class="metric-value">-</span>
+        </span>
+        <span class="metric-inline">
+          <span class="metric-label">Half Leading:</span>
+          <span id="halfLeadingFormula" class="metric-formula">-</span>
+          <span class="metric-equals">=</span>
+          <span id="halfLeadingValue" class="metric-value">-</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Parameters -->
+    <div id="tweakpane"></div>
 
     <script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
     <script src="https://unpkg.com/tweakpane@3.1.10/dist/tweakpane.min.js"></script>

@@ -380,13 +380,15 @@ function drawVisualization() {
     ctx.fillRect(0, bottomMin, canvas.width, halfLeading);
 
     // Half leading labels
+    ctx.font = "14px sans-serif";
+    ctx.textAlign = "left";
     ctx.fillStyle = "rgba(0, 128, 255, 0.8)";
 
     let topLabel = baselineY - metrics.ascender - Math.max(0, halfLeading);
     let bottomLabel = baselineY - metrics.descender + Math.max(0, halfLeading);
 
-    ctx.fillText("half leading", 10, topLabel + 15);
-    ctx.fillText("half leading", 10, bottomLabel - 5);
+    ctx.fillText("half leading", 0, topLabel + 18);
+    ctx.fillText("half leading", 0, bottomLabel - 5);
   }
 
   // Update HTML text display (contenteditableなので、テキストは変更しない)
@@ -394,34 +396,25 @@ function drawVisualization() {
   textDisplay.style.fontSize = `${fontSize}px`;
   textDisplay.style.lineHeight = `${lineHeightPx}px`;
 
-  // Let the content auto-size based on text
-  visualizerContent.style.height = "auto";
+  // CSS handles height matching now
 
   // Draw labels
-  ctx.font = "12px sans-serif";
+  ctx.font = "14px sans-serif";
   ctx.textAlign = "right";
   ctx.fillStyle = METRICS_COLORS.baseline;
-  ctx.fillText("baseline", canvasWidth - 10, baselineY - 5);
+  ctx.fillText("baseline", canvasWidth, baselineY - 5);
 
   ctx.fillStyle = METRICS_COLORS.ascender;
-  ctx.fillText("ascender", canvasWidth - 10, baselineY - metrics.ascender - 5);
+  ctx.fillText("ascender", canvasWidth, baselineY - metrics.ascender - 5);
 
   ctx.fillStyle = METRICS_COLORS.descender;
-  ctx.fillText(
-    "descender",
-    canvasWidth - 10,
-    baselineY - metrics.descender + 15
-  );
+  ctx.fillText("descender", canvasWidth, baselineY - metrics.descender + 15);
 
   ctx.fillStyle = METRICS_COLORS.capHeight;
-  ctx.fillText(
-    "cap height",
-    canvasWidth - 10,
-    baselineY - metrics.capHeight - 5
-  );
+  ctx.fillText("cap height", canvasWidth, baselineY - metrics.capHeight - 5);
 
   ctx.fillStyle = METRICS_COLORS.xHeight;
-  ctx.fillText("x-height", canvasWidth - 10, baselineY - metrics.xHeight - 5);
+  ctx.fillText("x-height", canvasWidth, baselineY - metrics.xHeight - 5);
 }
 
 async function updateVisualization() {
@@ -430,7 +423,7 @@ async function updateVisualization() {
 
   // ローディング表示
   ctx.fillStyle = "#666";
-  ctx.font = "16px sans-serif";
+  ctx.font = "15px sans-serif";
   ctx.textAlign = "center";
   ctx.fillText("Loading font...", canvas.width / 2, canvas.height / 2);
 
@@ -446,6 +439,11 @@ async function updateVisualization() {
 
 // Redraw when text is edited
 textDisplay.addEventListener("input", drawVisualization);
+
+// Handle window resize
+window.addEventListener("resize", () => {
+  drawVisualization();
+});
 
 // Initialize
 textDisplay.textContent = "Hej!";
