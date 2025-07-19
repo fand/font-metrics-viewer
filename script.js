@@ -120,6 +120,25 @@ function getMetrics(font, fontSize) {
     };
 }
 
+function updateMetricsDisplay() {
+    const unitsPerEmEl = document.getElementById('unitsPerEm');
+    const ascentEl = document.getElementById('ascentValue');
+    const descentEl = document.getElementById('descentValue');
+    const lineGapEl = document.getElementById('lineGapValue');
+    
+    if (currentFont) {
+        unitsPerEmEl.textContent = currentFont.unitsPerEm;
+        ascentEl.textContent = currentFont.ascent;
+        descentEl.textContent = currentFont.descent;
+        lineGapEl.textContent = currentFont.lineGap || 0;
+    } else {
+        unitsPerEmEl.textContent = '-';
+        ascentEl.textContent = '-';
+        descentEl.textContent = '-';
+        lineGapEl.textContent = '-';
+    }
+}
+
 function drawVisualization() {
     const text = textInput.value || 'Hej!';
     const fontSize = parseInt(fontSizeInput.value);
@@ -220,6 +239,9 @@ async function updateVisualization() {
     
     currentFont = await loadGoogleFont(fontFamily);
     console.log('Font loaded:', currentFont ? 'Success' : 'Using fallback');
+    
+    // Update metrics display
+    updateMetricsDisplay();
     
     // Always draw visualization
     drawVisualization();
