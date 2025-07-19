@@ -5,6 +5,7 @@ const fontFamilySelect = document.getElementById('fontFamily');
 const fontSizeInput = document.getElementById('fontSize');
 const lineHeightAutoCheckbox = document.getElementById('lineHeightAuto');
 const lineHeightInput = document.getElementById('lineHeight');
+const textDisplay = document.getElementById('textDisplay');
 
 let currentFont = null;
 const loadedFonts = new Map();
@@ -59,6 +60,9 @@ async function loadGoogleFont(fontFamily) {
                 link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(' ', '+')}:wght@400&display=swap`;
                 document.head.appendChild(link);
                 
+                // フォントが実際に読み込まれるまで待つ
+                await document.fonts.load(`16px "${fontFamily}"`);
+                
                 return font;
             } catch (error) {
                 console.error('Error loading font file:', error);
@@ -78,6 +82,13 @@ async function loadGoogleFont(fontFamily) {
         link.onload = resolve;
         setTimeout(resolve, 1000);
     });
+    
+    // フォントが実際に読み込まれるまで待つ
+    try {
+        await document.fonts.load(`16px "${fontFamily}"`);
+    } catch (e) {
+        console.log('Font loading fallback');
+    }
 
     console.warn(`Could not load font for ${fontFamily}, using fallback`);
     return null;
@@ -119,7 +130,7 @@ function drawVisualization() {
     const padding = 60;
     
     // Set font before measuring text
-    ctx.font = `${fontSize}px "${fontFamilySelect.value}"`;
+    ctx.font = `${fontSize}px "${fontFamilySelect.value}", sans-serif`;
     const textWidth = ctx.measureText(text).width;
     
     const lineHeightPx = lineHeight === 'normal' 
@@ -168,12 +179,15 @@ function drawVisualization() {
     
     ctx.setLineDash([]);
     
-    // Draw text
-    ctx.font = `${fontSize}px "${fontFamilySelect.value}"`;
-    ctx.fillStyle = '#000';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText(text, canvas.width / 2, baselineY);
+    // Update HTML text display
+    textDisplay.textContent = text;
+    textDisplay.style.fontFamily = `"${fontFamilySelect.value}", sans-serif`;
+    textDisplay.style.fontSize = `${fontSize}px`;
+    textDisplay.style.lineHeight = `${lineHeightPx}px`;
+    
+    // Visualizer-contentの高さを設定
+    const visualizerContent = document.querySelector('.visualizer-content');
+    visualizerContent.style.height = `${canvas.height}px`;
     
     // Draw labels
     ctx.font = '12px sans-serif';
