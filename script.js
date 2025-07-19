@@ -251,10 +251,18 @@ function updateMetricsDisplay() {
   const lineHeight = params.lineHeightAuto ? "normal" : params.lineHeight;
 
   if (currentFont) {
-    unitsPerEmEl.textContent = currentFont.unitsPerEm;
-    ascentEl.textContent = currentFont.ascent;
-    descentEl.textContent = currentFont.descent;
-    lineGapEl.textContent = currentFont.lineGap || 0;
+    const metrics = getMetrics(currentFont, fontSize);
+
+    unitsPerEmEl.textContent = `${currentFont.unitsPerEm} (${fontSize}px)`;
+    ascentEl.textContent = `${currentFont.ascent} (${metrics.ascender.toFixed(
+      1
+    )}px)`;
+    descentEl.textContent = `${currentFont.descent} (${Math.abs(
+      metrics.descender
+    ).toFixed(1)}px)`;
+    lineGapEl.textContent = `${
+      currentFont.lineGap || 0
+    } (${metrics.lineGap.toFixed(1)}px)`;
 
     // Calculate Top to Baseline
     const topToBaseline =
@@ -263,7 +271,7 @@ function updateMetricsDisplay() {
     topToBaselineValueEl.textContent = `${topToBaseline.toFixed(2)} px`;
 
     // Calculate Half Leading
-    const metrics = getMetrics(currentFont, fontSize);
+    // const metrics = getMetrics(currentFont, fontSize);
     const lineHeightPx =
       lineHeight === "normal"
         ? metrics.ascender - metrics.descender + metrics.lineGap
