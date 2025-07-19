@@ -20,9 +20,9 @@ const params = {
   lineHeightAuto: true,
   lineHeight: 1.2,
   loadFile: () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.otf,.ttf,.woff,.woff2';
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".otf,.ttf,.woff,.woff2";
     input.onchange = async (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -31,13 +31,13 @@ const params = {
           const font = fontkit.create(new Uint8Array(arrayBuffer));
           currentFont = font;
           loadedFonts.set(file.name, font);
-          
+
           // Create a CSS font-face for the loaded font
           const fontName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
           const fontUrl = URL.createObjectURL(file);
-          
+
           // Add CSS font-face
-          const style = document.createElement('style');
+          const style = document.createElement("style");
           style.textContent = `
             @font-face {
               font-family: "${fontName}";
@@ -45,16 +45,18 @@ const params = {
             }
           `;
           document.head.appendChild(style);
-          
+
           // Update params to show loaded file name
           params.fontFamily = fontName;
           pane.refresh();
-          
+
           updateMetricsDisplay();
           drawVisualization();
         } catch (error) {
-          console.error('Error loading font file:', error);
-          alert('Error loading font file. Please make sure it\'s a valid font file.');
+          console.error("Error loading font file:", error);
+          alert(
+            "Error loading font file. Please make sure it's a valid font file."
+          );
         }
       }
     };
@@ -104,9 +106,11 @@ const fontOptions = [
 ];
 
 // Add controls
-pane.addButton({
-  title: 'Load Local Font',
-}).on('click', params.loadFile);
+pane
+  .addButton({
+    title: "Load Local Font",
+  })
+  .on("click", params.loadFile);
 
 pane
   .addInput(params, "fontFamily", {
@@ -133,15 +137,15 @@ pane
 pane
   .addInput(params, "fontWeight", {
     options: {
-      "100": "100",
-      "200": "200", 
-      "300": "300",
-      "400": "400",
-      "500": "500",
-      "600": "600",
-      "700": "700",
-      "800": "800",
-      "900": "900",
+      100: "100",
+      200: "200",
+      300: "300",
+      400: "400",
+      500: "500",
+      600: "600",
+      700: "700",
+      800: "800",
+      900: "900",
     },
   })
   .on("change", () => {
@@ -151,9 +155,9 @@ pane
 pane
   .addInput(params, "fontStyle", {
     options: {
-      "normal": "normal",
-      "italic": "italic",
-      "oblique": "oblique",
+      normal: "normal",
+      italic: "italic",
+      oblique: "oblique",
     },
   })
   .on("change", () => {
@@ -379,7 +383,7 @@ function drawVisualization() {
 
   const metrics = getMetrics(currentFont, fontSize);
 
-  const padding = 60;
+  const padding = 120;
 
   // Get visualizer container width
   const visualizerContent = document.querySelector(".visualizer-content");
@@ -531,54 +535,54 @@ window.addEventListener("resize", () => {
 });
 
 // Handle drag and drop for font files
-const dragOverlay = document.getElementById('dragOverlay');
+const dragOverlay = document.getElementById("dragOverlay");
 
-document.addEventListener('dragenter', (e) => {
+document.addEventListener("dragenter", (e) => {
   e.preventDefault();
   const items = Array.from(e.dataTransfer.items);
-  const hasFontFile = items.some(item => 
-    item.kind === 'file' && item.type.match(/font|ttf|otf|woff/)
+  const hasFontFile = items.some(
+    (item) => item.kind === "file" && item.type.match(/font|ttf|otf|woff/)
   );
-  
-  if (hasFontFile || items.some(item => item.kind === 'file')) {
-    dragOverlay.style.display = 'flex';
+
+  if (hasFontFile || items.some((item) => item.kind === "file")) {
+    dragOverlay.style.display = "flex";
   }
 });
 
-document.addEventListener('dragover', (e) => {
+document.addEventListener("dragover", (e) => {
   e.preventDefault();
-  e.dataTransfer.dropEffect = 'copy';
+  e.dataTransfer.dropEffect = "copy";
 });
 
-document.addEventListener('dragleave', (e) => {
+document.addEventListener("dragleave", (e) => {
   e.preventDefault();
   if (e.clientX === 0 && e.clientY === 0) {
-    dragOverlay.style.display = 'none';
+    dragOverlay.style.display = "none";
   }
 });
 
-document.addEventListener('drop', async (e) => {
+document.addEventListener("drop", async (e) => {
   e.preventDefault();
-  dragOverlay.style.display = 'none';
-  
+  dragOverlay.style.display = "none";
+
   const files = Array.from(e.dataTransfer.files);
-  const fontFile = files.find(file => 
+  const fontFile = files.find((file) =>
     file.name.match(/\.(otf|ttf|woff|woff2)$/i)
   );
-  
+
   if (fontFile) {
     try {
       const arrayBuffer = await fontFile.arrayBuffer();
       const font = fontkit.create(new Uint8Array(arrayBuffer));
       currentFont = font;
       loadedFonts.set(fontFile.name, font);
-      
+
       // Create a CSS font-face for the loaded font
       const fontName = fontFile.name.replace(/\.[^/.]+$/, ""); // Remove extension
       const fontUrl = URL.createObjectURL(fontFile);
-      
+
       // Add CSS font-face
-      const style = document.createElement('style');
+      const style = document.createElement("style");
       style.textContent = `
         @font-face {
           font-family: "${fontName}";
@@ -586,16 +590,18 @@ document.addEventListener('drop', async (e) => {
         }
       `;
       document.head.appendChild(style);
-      
+
       // Update params to show loaded file name
       params.fontFamily = fontName;
       pane.refresh();
-      
+
       updateMetricsDisplay();
       drawVisualization();
     } catch (error) {
-      console.error('Error loading font file:', error);
-      alert('Error loading font file. Please make sure it\'s a valid font file.');
+      console.error("Error loading font file:", error);
+      alert(
+        "Error loading font file. Please make sure it's a valid font file."
+      );
     }
   }
 });

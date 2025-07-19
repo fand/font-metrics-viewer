@@ -45,6 +45,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 120px 0;
 }
 
 #canvas {
@@ -62,10 +63,11 @@ h1 {
   overflow-wrap: normal;
   outline: none;
   cursor: text;
-  padding: 60px;
+  padding: 0 60px;
   box-sizing: border-box;
   text-align: center;
   overflow-x: auto;
+  overflow-y: visible;
 }
 
 .text-display:focus {
