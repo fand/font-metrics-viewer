@@ -1,13 +1,111 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-const fontFamilySelect = document.getElementById("fontFamily");
-const fontSizeInput = document.getElementById("fontSize");
-const lineHeightAutoCheckbox = document.getElementById("lineHeightAuto");
-const lineHeightInput = document.getElementById("lineHeight");
 const textDisplay = document.getElementById("textDisplay");
 
 let currentFont = null;
 const loadedFonts = new Map();
+
+// Tweakpane setup
+const pane = new Tweakpane.Pane({
+  container: document.getElementById('tweakpane'),
+  title: 'Parameters',
+});
+
+// Parameters object
+const params = {
+  fontFamily: 'Inter',
+  fontSize: 100,
+  lineHeightAuto: true,
+  lineHeight: 1.2,
+};
+
+// Font family options
+const fontOptions = [
+  { text: 'Inter', value: 'Inter' },
+  { text: 'Roboto', value: 'Roboto' },
+  { text: 'Open Sans', value: 'Open Sans' },
+  { text: 'Lato', value: 'Lato' },
+  { text: 'Montserrat', value: 'Montserrat' },
+  { text: 'Raleway', value: 'Raleway' },
+  { text: 'Poppins', value: 'Poppins' },
+  { text: 'Playfair Display', value: 'Playfair Display' },
+  { text: 'Merriweather', value: 'Merriweather' },
+  { text: 'Source Sans Pro', value: 'Source Sans Pro' },
+  { text: 'Ubuntu', value: 'Ubuntu' },
+  { text: 'Oswald', value: 'Oswald' },
+  { text: 'Nunito', value: 'Nunito' },
+  { text: 'Work Sans', value: 'Work Sans' },
+  { text: 'Quicksand', value: 'Quicksand' },
+  { text: 'Bebas Neue', value: 'Bebas Neue' },
+  { text: 'Fira Sans', value: 'Fira Sans' },
+  { text: 'Barlow', value: 'Barlow' },
+  { text: 'IBM Plex Sans', value: 'IBM Plex Sans' },
+  { text: 'Cabin', value: 'Cabin' },
+  { text: 'Comfortaa', value: 'Comfortaa' },
+  { text: 'Dancing Script', value: 'Dancing Script' },
+  { text: 'Pacifico', value: 'Pacifico' },
+  { text: 'Lobster', value: 'Lobster' },
+  { text: 'Shadows Into Light', value: 'Shadows Into Light' },
+  { text: 'Permanent Marker', value: 'Permanent Marker' },
+  { text: 'Caveat', value: 'Caveat' },
+  { text: 'Satisfy', value: 'Satisfy' },
+  { text: 'Great Vibes', value: 'Great Vibes' },
+  { text: 'Noto Sans JP', value: 'Noto Sans JP' },
+  { text: 'Noto Serif JP', value: 'Noto Serif JP' },
+  { text: 'M PLUS Rounded 1c', value: 'M PLUS Rounded 1c' },
+  { text: 'Kosugi Maru', value: 'Kosugi Maru' },
+  { text: 'Sawarabi Gothic', value: 'Sawarabi Gothic' },
+  { text: 'Klee One', value: 'Klee One' },
+  { text: 'Dela Gothic One', value: 'Dela Gothic One' },
+  { text: 'Shippori Mincho', value: 'Shippori Mincho' },
+];
+
+// Add controls
+pane.addInput(params, 'fontFamily', {
+  options: fontOptions.reduce((acc, option) => {
+    acc[option.text] = option.value;
+    return acc;
+  }, {}),
+}).on('change', () => {
+  updateVisualization();
+});
+
+pane.addInput(params, 'fontSize', {
+  min: 10,
+  max: 500,
+  step: 1,
+}).on('change', () => {
+  updateMetricsDisplay();
+  drawVisualization();
+});
+
+pane.addInput(params, 'lineHeightAuto').on('change', () => {
+  updateMetricsDisplay();
+  drawVisualization();
+});
+
+const lineHeightInput = pane.addInput(params, 'lineHeight', {
+  min: 0.5,
+  max: 3,
+  step: 0.1,
+  disabled: params.lineHeightAuto,
+}).on('change', () => {
+  updateMetricsDisplay();
+  drawVisualization();
+});
+
+// Disable line height when auto is checked
+pane.on('change', (ev) => {
+  if (ev.target.presetKey === 'lineHeightAuto') {
+    lineHeightInput.disabled = params.lineHeightAuto;
+  }
+});
+
+// Position tweakpane
+pane.element.style.position = 'fixed';
+pane.element.style.top = '20px';
+pane.element.style.right = '20px';
+pane.element.style.zIndex = '2';
 
 const METRICS_COLORS = {
   baseline: "rgba(255, 0, 0, 0.8)",
@@ -143,10 +241,10 @@ function updateMetricsDisplay() {
   const halfLeadingFormulaEl = document.getElementById("halfLeadingFormula");
   const halfLeadingValueEl = document.getElementById("halfLeadingValue");
 
-  const fontSize = parseInt(fontSizeInput.value);
-  const lineHeight = lineHeightAutoCheckbox.checked
+  const fontSize = params.fontSize;
+  const lineHeight = params.lineHeightAuto
     ? "normal"
-    : parseFloat(lineHeightInput.value);
+    : params.lineHeight;
 
   if (currentFont) {
     unitsPerEmEl.textContent = currentFont.unitsPerEm;
@@ -189,10 +287,10 @@ function updateMetricsDisplay() {
 
 function drawVisualization() {
   const text = textDisplay.textContent || "Hej!";
-  const fontSize = parseInt(fontSizeInput.value);
-  const lineHeight = lineHeightAutoCheckbox.checked
+  const fontSize = params.fontSize;
+  const lineHeight = params.lineHeightAuto
     ? "normal"
-    : parseFloat(lineHeightInput.value);
+    : params.lineHeight;
 
   const metrics = getMetrics(currentFont, fontSize);
 
@@ -203,7 +301,7 @@ function drawVisualization() {
   const containerWidth = visualizerContent.offsetWidth;
 
   // Set font before measuring text
-  ctx.font = `${fontSize}px "${fontFamilySelect.value}", sans-serif`;
+  ctx.font = `${fontSize}px "${params.fontFamily}", sans-serif`;
   const textWidth = ctx.measureText(text).width;
 
   const lineHeightPx =
@@ -290,7 +388,7 @@ function drawVisualization() {
   }
 
   // Update HTML text display (contenteditableなので、テキストは変更しない)
-  textDisplay.style.fontFamily = `"${fontFamilySelect.value}", sans-serif`;
+  textDisplay.style.fontFamily = `"${params.fontFamily}", sans-serif`;
   textDisplay.style.fontSize = `${fontSize}px`;
   textDisplay.style.lineHeight = `${lineHeightPx}px`;
 
@@ -325,7 +423,7 @@ function drawVisualization() {
 }
 
 async function updateVisualization() {
-  const fontFamily = fontFamilySelect.value;
+  const fontFamily = params.fontFamily;
   console.log("Loading font:", fontFamily);
 
   // ローディング表示
@@ -343,23 +441,6 @@ async function updateVisualization() {
   // Always draw visualization
   drawVisualization();
 }
-
-// Event listeners
-fontFamilySelect.addEventListener("change", updateVisualization);
-fontSizeInput.addEventListener("input", () => {
-  updateMetricsDisplay();
-  drawVisualization();
-});
-lineHeightInput.addEventListener("input", () => {
-  updateMetricsDisplay();
-  drawVisualization();
-});
-
-lineHeightAutoCheckbox.addEventListener("change", (e) => {
-  lineHeightInput.disabled = e.target.checked;
-  updateMetricsDisplay();
-  drawVisualization();
-});
 
 // Redraw when text is edited
 textDisplay.addEventListener("input", drawVisualization);

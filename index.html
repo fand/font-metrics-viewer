@@ -56,71 +56,11 @@
 
 
         <!-- Parameters -->
-        <div class="section">
-            <h2>Parameters</h2>
-            
-            <div class="parameter">
-                <label for="fontFamily">Font Family:</label>
-                <select id="fontFamily">
-                    <option value="Inter" selected>Inter</option>
-                    <option value="Roboto">Roboto</option>
-                    <option value="Open Sans">Open Sans</option>
-                    <option value="Lato">Lato</option>
-                    <option value="Montserrat">Montserrat</option>
-                    <option value="Raleway">Raleway</option>
-                    <option value="Poppins">Poppins</option>
-                    <option value="Playfair Display">Playfair Display</option>
-                    <option value="Merriweather">Merriweather</option>
-                    <option value="Source Sans Pro">Source Sans Pro</option>
-                    <option value="Ubuntu">Ubuntu</option>
-                    <option value="Oswald">Oswald</option>
-                    <option value="Nunito">Nunito</option>
-                    <option value="Work Sans">Work Sans</option>
-                    <option value="Quicksand">Quicksand</option>
-                    <option value="Bebas Neue">Bebas Neue</option>
-                    <option value="Fira Sans">Fira Sans</option>
-                    <option value="Barlow">Barlow</option>
-                    <option value="IBM Plex Sans">IBM Plex Sans</option>
-                    <option value="Cabin">Cabin</option>
-                    <option value="Comfortaa">Comfortaa</option>
-                    <option value="Dancing Script">Dancing Script</option>
-                    <option value="Pacifico">Pacifico</option>
-                    <option value="Lobster">Lobster</option>
-                    <option value="Shadows Into Light">Shadows Into Light</option>
-                    <option value="Permanent Marker">Permanent Marker</option>
-                    <option value="Caveat">Caveat</option>
-                    <option value="Satisfy">Satisfy</option>
-                    <option value="Great Vibes">Great Vibes</option>
-                    <option value="Noto Sans JP">Noto Sans JP</option>
-                    <option value="Noto Serif JP">Noto Serif JP</option>
-                    <option value="M PLUS Rounded 1c">M PLUS Rounded 1c</option>
-                    <option value="Kosugi Maru">Kosugi Maru</option>
-                    <option value="Sawarabi Gothic">Sawarabi Gothic</option>
-                    <option value="Klee One">Klee One</option>
-                    <option value="Dela Gothic One">Dela Gothic One</option>
-                    <option value="Shippori Mincho">Shippori Mincho</option>
-                </select>
-            </div>
-
-            <div class="parameter">
-                <label for="fontSize">Font Size:</label>
-                <input type="number" id="fontSize" value="100" min="10" max="500">
-                <span>px</span>
-            </div>
-
-            <div class="parameter">
-                <label>Line Height Auto:</label>
-                <input type="checkbox" id="lineHeightAuto" checked>
-            </div>
-
-            <div class="parameter">
-                <label for="lineHeight">Line Height:</label>
-                <input type="number" id="lineHeight" value="1.2" min="0.5" max="3" step="0.1" disabled>
-            </div>
-        </div>
+        <div id="tweakpane"></div>
     </div>
 
     <script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
+    <script src="https://unpkg.com/tweakpane@3.1.10/dist/tweakpane.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
