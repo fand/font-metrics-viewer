@@ -161,6 +161,7 @@ pane
   });
 
 pane.addInput(params, "lineHeightAuto").on("change", () => {
+  lineHeightInput.disabled = params.lineHeightAuto;
   updateMetricsDisplay();
   drawVisualization();
 });
@@ -176,13 +177,6 @@ const lineHeightInput = pane
     updateMetricsDisplay();
     drawVisualization();
   });
-
-// Disable line height when auto is checked
-pane.on("change", (ev) => {
-  if (ev.target.presetKey === "lineHeightAuto") {
-    lineHeightInput.disabled = params.lineHeightAuto;
-  }
-});
 
 // Position tweakpane
 pane.element.style.position = "fixed";
