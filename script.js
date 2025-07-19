@@ -124,17 +124,45 @@ function updateMetricsDisplay() {
     const ascentEl = document.getElementById('ascentValue');
     const descentEl = document.getElementById('descentValue');
     const lineGapEl = document.getElementById('lineGapValue');
+    const topToBaselineFormulaEl = document.getElementById('topToBaselineFormula');
+    const topToBaselineValueEl = document.getElementById('topToBaselineValue');
+    const halfLeadingFormulaEl = document.getElementById('halfLeadingFormula');
+    const halfLeadingValueEl = document.getElementById('halfLeadingValue');
+    
+    const fontSize = parseInt(fontSizeInput.value);
+    const lineHeight = lineHeightAutoCheckbox.checked ? 'normal' : parseFloat(lineHeightInput.value);
     
     if (currentFont) {
         unitsPerEmEl.textContent = currentFont.unitsPerEm;
         ascentEl.textContent = currentFont.ascent;
         descentEl.textContent = currentFont.descent;
         lineGapEl.textContent = currentFont.lineGap || 0;
+        
+        // Calculate Top to Baseline
+        const topToBaseline = (currentFont.ascent / currentFont.unitsPerEm) * fontSize;
+        topToBaselineFormulaEl.textContent = `${currentFont.ascent} / ${currentFont.unitsPerEm} × ${fontSize}`;
+        topToBaselineValueEl.textContent = `${topToBaseline.toFixed(2)} px`;
+        
+        // Calculate Half Leading
+        const metrics = getMetrics(currentFont, fontSize);
+        const lineHeightPx = lineHeight === 'normal' 
+            ? (metrics.ascender - metrics.descender + metrics.lineGap)
+            : fontSize * lineHeight;
+        const fontHeight = metrics.ascender - metrics.descender;
+        const halfLeading = (lineHeightPx - fontHeight) / 2;
+        
+        const lineHeightStr = lineHeight === 'normal' ? 'auto' : `${fontSize} × ${lineHeight}`;
+        halfLeadingFormulaEl.textContent = `(${lineHeightStr} - ${fontHeight.toFixed(1)}) / 2`;
+        halfLeadingValueEl.textContent = `${halfLeading.toFixed(2)} px`;
     } else {
         unitsPerEmEl.textContent = '-';
         ascentEl.textContent = '-';
         descentEl.textContent = '-';
         lineGapEl.textContent = '-';
+        topToBaselineFormulaEl.textContent = '-';
+        topToBaselineValueEl.textContent = '-';
+        halfLeadingFormulaEl.textContent = '-';
+        halfLeadingValueEl.textContent = '-';
     }
 }
 
@@ -147,6 +175,10 @@ function drawVisualization() {
     
     const padding = 60;
     
+    // Get visualizer container width
+    const visualizerContent = document.querySelector('.visualizer-content');
+    const containerWidth = visualizerContent.offsetWidth;
+    
     // Set font before measuring text
     ctx.font = `${fontSize}px "${fontFamilySelect.value}", sans-serif`;
     const textWidth = ctx.measureText(text).width;
@@ -155,7 +187,8 @@ function drawVisualization() {
         ? (metrics.ascender - metrics.descender + metrics.lineGap)
         : fontSize * lineHeight;
     
-    canvas.width = Math.max(800, textWidth + padding * 2);
+    // Canvas should fill the container width
+    canvas.width = containerWidth;
     canvas.height = lineHeightPx + padding * 2;
     
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -203,7 +236,6 @@ function drawVisualization() {
     textDisplay.style.lineHeight = `${lineHeightPx}px`;
     
     // Visualizer-contentの高さを設定
-    const visualizerContent = document.querySelector('.visualizer-content');
     visualizerContent.style.height = `${canvas.height}px`;
     
     // Draw labels
@@ -247,11 +279,18 @@ async function updateVisualization() {
 
 // Event listeners
 fontFamilySelect.addEventListener('change', updateVisualization);
-fontSizeInput.addEventListener('input', drawVisualization);
-lineHeightInput.addEventListener('input', drawVisualization);
+fontSizeInput.addEventListener('input', () => {
+    updateMetricsDisplay();
+    drawVisualization();
+});
+lineHeightInput.addEventListener('input', () => {
+    updateMetricsDisplay();
+    drawVisualization();
+});
 
 lineHeightAutoCheckbox.addEventListener('change', (e) => {
     lineHeightInput.disabled = e.target.checked;
+    updateMetricsDisplay();
     drawVisualization();
 });
 

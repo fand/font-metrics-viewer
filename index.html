@@ -10,6 +10,8 @@
 </head>
 <body>
     <div class="container">
+        <h1>Font Metrics Visualizer</h1>
+        
         <!-- Visualizer -->
         <div class="visualizer">
             <div class="visualizer-content">
@@ -17,22 +19,38 @@
                 <div id="textDisplay" class="text-display" contenteditable="true"></div>
             </div>
             <div class="metrics-info">
-                <span class="metric-inline">
-                    <span class="metric-label">Units/Em:</span>
-                    <span id="unitsPerEm" class="metric-value">-</span>
-                </span>
-                <span class="metric-inline">
-                    <span class="metric-label">Ascent:</span>
-                    <span id="ascentValue" class="metric-value">-</span>
-                </span>
-                <span class="metric-inline">
-                    <span class="metric-label">Descent:</span>
-                    <span id="descentValue" class="metric-value">-</span>
-                </span>
-                <span class="metric-inline">
-                    <span class="metric-label">Line Gap:</span>
-                    <span id="lineGapValue" class="metric-value">-</span>
-                </span>
+                <div class="metrics-row">
+                    <span class="metric-inline">
+                        <span class="metric-label">Units/Em:</span>
+                        <span id="unitsPerEm" class="metric-value">-</span>
+                    </span>
+                    <span class="metric-inline">
+                        <span class="metric-label">Ascent:</span>
+                        <span id="ascentValue" class="metric-value">-</span>
+                    </span>
+                    <span class="metric-inline">
+                        <span class="metric-label">Descent:</span>
+                        <span id="descentValue" class="metric-value">-</span>
+                    </span>
+                    <span class="metric-inline">
+                        <span class="metric-label">Line Gap:</span>
+                        <span id="lineGapValue" class="metric-value">-</span>
+                    </span>
+                </div>
+                <div class="metrics-row calculated">
+                    <span class="metric-inline">
+                        <span class="metric-label">Top to Baseline:</span>
+                        <span id="topToBaselineFormula" class="metric-formula">-</span>
+                        <span class="metric-equals">=</span>
+                        <span id="topToBaselineValue" class="metric-value">-</span>
+                    </span>
+                    <span class="metric-inline">
+                        <span class="metric-label">Half Leading:</span>
+                        <span id="halfLeadingFormula" class="metric-formula">-</span>
+                        <span class="metric-equals">=</span>
+                        <span id="halfLeadingValue" class="metric-value">-</span>
+                    </span>
+                </div>
             </div>
         </div>
 
