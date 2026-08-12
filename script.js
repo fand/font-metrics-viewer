@@ -5,6 +5,49 @@ const textDisplay = document.getElementById("textDisplay");
 let currentFont = null;
 const loadedFonts = new Map();
 
+// Inject (or replace) an @font-face for a locally-loaded font.
+// Reloading the same font revokes the previous object URL and removes
+// the old <style> so blob buffers and DOM nodes don't accumulate.
+const localFontFaces = new Map(); // fontName -> { style, url }
+
+function registerLocalFontFace(fontName, file) {
+  const prev = localFontFaces.get(fontName);
+  if (prev) {
+    prev.style.remove();
+    URL.revokeObjectURL(prev.url);
+  }
+
+  const url = URL.createObjectURL(file);
+  const style = document.createElement("style");
+  style.textContent = `
+    @font-face {
+      font-family: "${fontName}";
+      src: url("${url}");
+    }
+  `;
+  document.head.appendChild(style);
+  localFontFaces.set(fontName, { style, url });
+}
+
+// Inject the Google Fonts <link> for a family/weight at most once.
+const injectedFontLinks = new Set(); // `${family}@${weight}`
+
+function ensureGoogleFontLink(fontFamily, weight) {
+  const key = `${fontFamily}@${weight}`;
+  if (injectedFontLinks.has(key)) {
+    return;
+  }
+  injectedFontLinks.add(key);
+
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(
+    / /g,
+    "+"
+  )}:wght@${weight}&display=swap`;
+  document.head.appendChild(link);
+}
+
 // Tweakpane setup
 const pane = new Tweakpane.Pane({
   container: document.getElementById("tweakpane"),
@@ -34,17 +77,7 @@ const params = {
 
           // Create a CSS font-face for the loaded font
           const fontName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
-          const fontUrl = URL.createObjectURL(file);
-
-          // Add CSS font-face
-          const style = document.createElement("style");
-          style.textContent = `
-            @font-face {
-              font-family: "${fontName}";
-              src: url("${fontUrl}");
-            }
-          `;
-          document.head.appendChild(style);
+          registerLocalFontFace(fontName, file);
 
           // Update params to show loaded file name
           params.fontFamily = fontName;
@@ -149,7 +182,8 @@ pane
     },
   })
   .on("change", () => {
-    drawVisualization();
+    // Weight changes the actual font file (and its metrics), so reload.
+    updateVisualization();
   });
 
 pane
@@ -198,16 +232,19 @@ const METRICS_COLORS = {
   lineGapNegative: "#ff6600",
 };
 
-async function loadGoogleFont(fontFamily) {
-  if (loadedFonts.has(fontFamily)) {
-    return loadedFonts.get(fontFamily);
+async function loadGoogleFont(fontFamily, weight = params.fontWeight) {
+  // Cache per family+weight: different weights are different font files
+  // with their own metrics.
+  const cacheKey = `${fontFamily}@${weight}`;
+  if (loadedFonts.has(cacheKey)) {
+    return loadedFonts.get(cacheKey);
   }
 
   // Google Fonts APIからCSSを取得
   const fontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(
-    " ",
+    / /g,
     "+"
-  )}`;
+  )}:wght@${weight}`;
 
   try {
     // 直接Google FontsのCSSを取得
@@ -235,20 +272,14 @@ async function loadGoogleFont(fontFamily) {
 
         // Fontkitでフォントを読み込む
         const font = fontkit.create(new Uint8Array(fontBuffer));
-        loadedFonts.set(fontFamily, font);
+        loadedFonts.set(cacheKey, font);
         console.log("Font loaded successfully with Fontkit:", font);
 
         // 表示用にもCSSを追加
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(
-          " ",
-          "+"
-        )}:wght@400&display=swap`;
-        document.head.appendChild(link);
+        ensureGoogleFontLink(fontFamily, weight);
 
         // フォントが実際に読み込まれるまで待つ
-        await document.fonts.load(`16px "${fontFamily}"`);
+        await document.fonts.load(`${weight} 16px "${fontFamily}"`);
 
         return font;
       } catch (error) {
@@ -260,22 +291,11 @@ async function loadGoogleFont(fontFamily) {
   }
 
   // フォールバック: 表示用のみ読み込む
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(
-    " ",
-    "+"
-  )}:wght@400&display=swap`;
-  document.head.appendChild(link);
-
-  await new Promise((resolve) => {
-    link.onload = resolve;
-    setTimeout(resolve, 1000);
-  });
+  ensureGoogleFontLink(fontFamily, weight);
 
   // フォントが実際に読み込まれるまで待つ
   try {
-    await document.fonts.load(`16px "${fontFamily}"`);
+    await document.fonts.load(`${weight} 16px "${fontFamily}"`);
   } catch (e) {
     console.log("Font loading fallback");
   }
@@ -463,8 +483,8 @@ function drawVisualization() {
     let bottomMin = baselineY - metrics.descender;
 
     ctx.fillStyle = "rgba(0, 128, 255, 0.1)";
-    ctx.fillRect(0, topMin, canvas.width, halfLeading);
-    ctx.fillRect(0, bottomMin, canvas.width, halfLeading);
+    ctx.fillRect(0, topMin, canvasWidth, halfLeading);
+    ctx.fillRect(0, bottomMin, canvasWidth, halfLeading);
 
     // Half leading labels
     if (Math.abs(halfLeading) > 5) {
@@ -626,17 +646,7 @@ document.addEventListener("drop", async (e) => {
 
       // Create a CSS font-face for the loaded font
       const fontName = fontFile.name.replace(/\.[^/.]+$/, ""); // Remove extension
-      const fontUrl = URL.createObjectURL(fontFile);
-
-      // Add CSS font-face
-      const style = document.createElement("style");
-      style.textContent = `
-        @font-face {
-          font-family: "${fontName}";
-          src: url("${fontUrl}");
-        }
-      `;
-      document.head.appendChild(style);
+      registerLocalFontFace(fontName, fontFile);
 
       // Update params to show loaded file name
       params.fontFamily = fontName;
